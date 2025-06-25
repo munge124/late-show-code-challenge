@@ -1,49 +1,51 @@
 import sys
-from datetime import date
 from pathlib import Path
+from datetime import date
 
-# Add the project root to Python path
-project_root = str(Path(__file__).parent.parent)
-if project_root not in sys.path:
-    sys.path.append(project_root)
+# Add project root to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from server.app import create_app
-from server.models import db, User, Guest, Episode, Appearance
+from server.app import create_app, db
+from models import  User, Guest, Episode, Appearance
 
 def seed_data():
     app = create_app()
     
     with app.app_context():
-        print("Dropping all tables...")
-        db.drop_all()
-        
-        print("Creating all tables...")
-        db.create_all()
-        
-        print("Seeding data...")
-        # Create users
-        user1 = User(username='admin')
-        user1.set_password('password123')
-        db.session.add(user1)
-
-        # Create guests
-        guest1 = Guest(name='John Doe', occupation='Actor')
-        guest2 = Guest(name='Jane Smith', occupation='Musician')
-        db.session.add_all([guest1, guest2])
-
-        # Create episodes
-        episode1 = Episode(date=date(2023, 1, 1), number=101)
-        episode2 = Episode(date=date(2023, 1, 2), number=102)
-        db.session.add_all([episode1, episode2])
-
-        # Create appearances
-        appearance1 = Appearance(rating=5, guest_id=1, episode_id=1)
-        appearance2 = Appearance(rating=4, guest_id=2, episode_id=1)
-        appearance3 = Appearance(rating=3, guest_id=1, episode_id=2)
-        db.session.add_all([appearance1, appearance2, appearance3])
-
-        db.session.commit()
-        print("✅ Database seeded successfully!")
+        try:
+            print("Resetting database...")
+            db.reflect()
+            db.drop_all()
+            db.create_all()
+            
+            print("Seeding data...")
+            # Create users
+            admin = User(username='admin')
+            admin.set_password('admin123')
+            db.session.add(admin)
+            
+            # Create guests
+            guest1 = Guest(name='John Murphy', occupation='Actor')
+            guest2 = Guest(name='Jane Smith', occupation='Musician')
+            db.session.add_all([guest1, guest2])
+            
+            # Create episodes
+            ep1 = Episode(date=date(2023, 1, 1), number=101)
+            ep2 = Episode(date=date(2023, 1, 2), number=102)
+            db.session.add_all([ep1, ep2])
+            
+            # Create appearances
+            app1 = Appearance(rating=5, guest_id=1, episode_id=1)
+            app2 = Appearance(rating=4, guest_id=2, episode_id=1)
+            db.session.add_all([app1, app2])
+            
+            db.session.commit()
+            print("✅ Database seeded successfully!")
+        except Exception as e:
+            print(f"❌ Error: {str(e)}")
+            db.session.rollback()
+        finally:
+            db.session.close()
 
 if __name__ == '__main__':
     seed_data()

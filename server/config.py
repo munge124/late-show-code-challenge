@@ -6,7 +6,8 @@ load_dotenv()
 
 class Config:
     # Database Configuration
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/late_show_db')
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT Configuration
